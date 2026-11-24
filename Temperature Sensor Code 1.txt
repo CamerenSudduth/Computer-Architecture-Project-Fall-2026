@@ -1,0 +1,55 @@
+.data
+numbers: 
+    .word 32, 45, -9, 0, 67, 55, -89, -100
+    
+.text    
+main:
+    la t0, numbers #stores the base address of the list "numbers"
+
+lw t2, 0(t0) #t2 stores the first integer in the list
+li t1, 8
+
+add t3, x0, x0 #t3 is the register used to store the number of negative numbers
+add t4, x0, t2  #t4 is the register used to store the minimum integer
+add t5, x0, t2 #t5 is the register used to store the maximum integer
+
+readArray:   
+    lw t2, 0(t0) #t2 stores a integer in the list
+     
+    addi t0, t0, 4 #Moves pointer to the next integer in the list
+    addi t1, t1, -1 #Decreases loop counter by 1
+    
+    blt t2, x0, incrementNegative
+    beq x0, x0, continue
+    
+    incrementNegative:
+        addi t3, t3, 1
+        
+    continue:
+        blt t2, t4, updateMinimum
+        
+        beq x0, x0, continue2
+        
+        updateMinimum:
+            add t4, x0, t2
+            
+        continue2:
+            bge t2, t5, updateMaximum
+            
+            beq x0, x0, continue3
+            
+            updateMaximum:
+                add t5, x0, t2
+                
+                continue3:
+                    bne t1, x0, readArray
+                        
+    
+    
+    
+    
+
+    
+    
+    
+
