@@ -1,7 +1,7 @@
 # Temperature Summary (RV32, Ripes)
 # Finds the minimum, maximum, and number of negative integers in an
 # array of eight signed words. Min and max start as the first element.
-# Procedure summarize(a0 = base address, a1 = count)
+# Procedure Algorithm(a0 = base address, a1 = count)
 #   returns a0 (x10) = minimum, a1 = maximum, a2 = count of negatives
 # Final results are stored in min_result, max_result, and neg_count.
 
@@ -16,7 +16,7 @@ neg_count:  .word 0     # final count of negative numbers
 main:
     la a0, numbers      # argument 1: base address of the list "numbers"
     li a1, 8            # argument 2: number of elements
-    jal ra, summarize   # call procedure; results come back in a0, a1, a2
+    jal ra, Algorithm   # call procedure; results come back in a0, a1, a2
 
     la t0, min_result   # store the minimum
     sw a0, 0(t0)
@@ -26,9 +26,9 @@ main:
     sw a2, 0(t0)
 
 done:
-    beq x0, x0, done    # End
+    beq x0, x0, done    # stop here: pause Ripes and inspect results
 
-summarize:
+Algorithm:
     add t0, x0, a0      # t0 is the pointer to the list "numbers"
     add t1, x0, a1      # t1 is the loop counter
 
@@ -51,6 +51,7 @@ readArray:              # main loop: visits each integer in the list once
 
     continue:
         blt t2, t4, updateMinimum
+
         beq x0, x0, continue2
 
         updateMinimum:
@@ -58,6 +59,7 @@ readArray:              # main loop: visits each integer in the list once
 
         continue2:
             bge t2, t5, updateMaximum
+
             beq x0, x0, continue3
 
             updateMaximum:
@@ -65,7 +67,8 @@ readArray:              # main loop: visits each integer in the list once
 
                 continue3:
                     bne t1, x0, readArray
-                    add a0, x0, t4      # return minimum in a0 (x10)
-                    add a1, x0, t5      # return maximum in a1
-                    add a2, x0, t3      # return count of negative numbers in a2
-                    jalr x0, 0(ra)      # return to main (this is "ret")
+
+    add a0, x0, t4      # return minimum in a0 (x10)
+    add a1, x0, t5      # return maximum in a1
+    add a2, x0, t3      # return count of negative numbers in a2
+    jalr x0, 0(ra)      # return to main (this is "ret")
