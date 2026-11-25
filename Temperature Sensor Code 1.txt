@@ -1,55 +1,74 @@
+# Temperature Summary (RV32, Ripes)
+# Finds the minimum, maximum, and number of negative integers in an
+# array of eight signed words. Min and max start as the first element.
+# Procedure summarize(a0 = base address, a1 = count)
+#   returns a0 (x10) = minimum, a1 = maximum, a2 = count of negatives
+# Final results are stored in min_result, max_result, and neg_count.
+
 .data
-numbers: 
+numbers:
     .word 32, 45, -9, 0, 67, 55, -89, -100
-    
-.text    
+min_result: .word 0     # final minimum
+max_result: .word 0     # final maximum
+neg_count:  .word 0     # final count of negative numbers
+
+.text
 main:
-    la t0, numbers #stores the base address of the list "numbers"
+    la a0, numbers      # argument 1: base address of the list "numbers"
+    li a1, 8            # argument 2: number of elements
+    jal ra, summarize   # call procedure; results come back in a0, a1, a2
 
-lw t2, 0(t0) #t2 stores the first integer in the list
-li t1, 8
+    la t0, min_result   # store the minimum
+    sw a0, 0(t0)
+    la t0, max_result   # store the maximum
+    sw a1, 0(t0)
+    la t0, neg_count    # store the count of negative numbers
+    sw a2, 0(t0)
 
-add t3, x0, x0 #t3 is the register used to store the number of negative numbers
-add t4, x0, t2  #t4 is the register used to store the minimum integer
-add t5, x0, t2 #t5 is the register used to store the maximum integer
+done:
+    beq x0, x0, done    # stop here: pause Ripes and inspect results
 
-readArray:   
-    lw t2, 0(t0) #t2 stores a integer in the list
-     
-    addi t0, t0, 4 #Moves pointer to the next integer in the list
-    addi t1, t1, -1 #Decreases loop counter by 1
-    
+summarize:
+    add t0, x0, a0      # t0 is the pointer to the list "numbers"
+    add t1, x0, a1      # t1 is the loop counter
+
+    lw t2, 0(t0)        # t2 stores the first integer in the list
+    add t3, x0, x0      #t3 is the register used to store the number of negative numbers
+    add t4, x0, t2      #t4 is the register used to store the minimum integer
+    add t5, x0, t2      #t5 is the register used to store the maximum integer
+
+readArray:              # main loop: visits each integer in the list once
+    lw t2, 0(t0)        #t2 stores a integer in the list
+
+    addi t0, t0, 4      #Moves pointer to the next integer in the list
+    addi t1, t1, -1     #Decreases loop counter by 1
+
     blt t2, x0, incrementNegative
     beq x0, x0, continue
-    
+
     incrementNegative:
         addi t3, t3, 1
-        
+
     continue:
         blt t2, t4, updateMinimum
-        
+
         beq x0, x0, continue2
-        
+
         updateMinimum:
             add t4, x0, t2
-            
+
         continue2:
             bge t2, t5, updateMaximum
-            
+
             beq x0, x0, continue3
-            
+
             updateMaximum:
                 add t5, x0, t2
-                
+
                 continue3:
                     bne t1, x0, readArray
-                        
-    
-    
-    
-    
 
-    
-    
-    
-
+    add a0, x0, t4      # return minimum in a0 (x10)
+    add a1, x0, t5      # return maximum in a1
+    add a2, x0, t3      # return count of negative numbers in a2
+    jalr x0, 0(ra)      # return to main (this is "ret")
